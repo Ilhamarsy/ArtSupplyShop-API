@@ -10,19 +10,27 @@ class ProductController extends Controller
 {
     public function post(Request $request) {
         $name = $request->name;
-        $photo = $request->photo;
+        $photo = $request->file('photo');
         $price = $request->price;
         $about = $request->about;
         $category_id = $request->category_id;
 
+        $extent = $photo->getClientOriginalExtension();
+        
+        $filename = time() . '.' . $extent;
+
+        $photo->move(env('IMG_PATH'), $filename);
+
         $newProduct = Product::create([
             "name" => $name,
-            "photo" => $photo,
+            "photo" => $filename,
             "price" => $price,
             "about" => $about,
             "category_id" => $category_id,
             "is_delete" => false,
         ]);
+
+        Cache::forget('products');
 
         return response(
             [
@@ -34,7 +42,10 @@ class ProductController extends Controller
     }
 
     public function get() {
-        $products = Product::with("category")->get();
+        $products = Cache::remember('products', now()->addMinutes(30), function () {
+            return Product::with("category")->get();
+        });
+
         return response(
             [
                 "status" => "success",
@@ -71,6 +82,9 @@ class ProductController extends Controller
                 "category_id" => $category_id,
                 "is_delete" => false,
             ]);
+
+            Cache::forget('products');
+
             return response(
                 [
                     "status" => "success",
@@ -97,6 +111,9 @@ class ProductController extends Controller
             );
         } else {
             $product->delete();
+
+            Cache::forget('products');
+
             return response(
                 [
                     "status" => "success",
