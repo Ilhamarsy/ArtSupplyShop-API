@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,20 +16,30 @@ class UserController extends Controller
         $password = Hash::make($request->password);
         $role = Role::where("name", "user")->first();
 
-        $newUser = User::create([
-            "name" => $name,
-            "email" => $email,
-            "password" => $password,
-            "role_id" => $role->id,
-        ]);
-
-        return response(
-            [
-                "status" => "success",
-                "data" => $newUser,
-            ],
-            201
-        );
+        try {
+            $newUser = User::create([
+                "name" => $name,
+                "email" => $email,
+                "password" => $password,
+                "role_id" => $role->id,
+            ]);
+    
+            return response(
+                [
+                    "status" => "success",
+                    "data" => $newUser,
+                ],
+                201
+            );
+        } catch(QueryException $e) {
+            return response(
+                [
+                    "status" => "fail",
+                    "message" => "email sudah terdaftar",
+                ],
+                403
+            );
+        }
     }
 
     public function login(Request $request) {
