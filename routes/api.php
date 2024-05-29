@@ -20,8 +20,9 @@ Route::get('/user', function (Request $request) {
 Route::post("/customer/register", [UserController::class, "register"]);
 Route::get("/customer/profile", [UserController::class, "profile"])->middleware([CekToken::class]);
 
-// Login
+// All - user
 Route::post("/login", [UserController::class, "login"]);
+Route::get("/product", [ProductController::class, "get"])->middleware([CekToken::class]);
 
 // User Address
 Route::post("/customer/profile/address", [UserAddressController::class, "post"])->middleware([CekToken::class]);
@@ -47,7 +48,6 @@ Route::post("/admin/category", [CategoryController::class, "post"])->middleware(
 Route::delete("/admin/category/{CategoryId}", [CategoryController::class, "delete"])->middleware([CekToken::class, CekRoleAdmin::class]);
 
 // Admin Product
-Route::get("/admin/product", [ProductController::class, "get"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::post("/admin/product", [ProductController::class, "post"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::put("/admin/product/{ProductId}", [ProductController::class, "put"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::delete("/admin/product/{ProductId}", [ProductController::class, "delete"])->middleware([CekToken::class, CekRoleAdmin::class]);
