@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
-    public function post(Request $request) {
+    public function post(Request $request)
+    {
         $name = $request->name;
         $photo = $request->file('photo');
         $price = $request->price;
@@ -16,32 +17,47 @@ class ProductController extends Controller
         $category_id = $request->category_id;
 
         $extent = $photo->getClientOriginalExtension();
-        
+
         $filename = time() . '.' . $extent;
 
-        $photo->move(env('IMG_PATH'), $filename);
+        try {
+            $photo->move(env('IMG_PATH'), $filename);
 
-        $newProduct = Product::create([
-            "name" => $name,
-            "photo" => $filename,
-            "price" => $price,
-            "about" => $about,
-            "category_id" => $category_id,
-            "is_delete" => false,
-        ]);
+            $newProduct = Product::create([
+                "name" => $name,
+                "photo" => $filename,
+                "price" => $price,
+                "about" => $about,
+                "category_id" => $category_id,
+                "is_delete" => false,
+            ]);
 
-        Cache::forget('products');
+            Cache::forget('products');
 
-        return response(
-            [
-                "status" => "success",
-                "data" => $newProduct,
-            ],
-            201
-        );
+            return response(
+                [
+                    "status" => "success",
+                    "data" => $newProduct,
+                ],
+                201
+            );
+        } catch (\Throwable $th) {
+            if (file_exists(env('IMG_PATH') . $filename)) {
+                unlink(env('IMG_PATH') . $filename);
+            }
+
+            return response(
+                [
+                    "status" => "fail",
+                    "message" => $th,
+                ],
+                401
+            );
+        }
     }
 
-    public function get() {
+    public function get()
+    {
         $products = Cache::remember('products', now()->addMinutes(30), function () {
             return Product::with("category")->get();
         });
@@ -55,7 +71,8 @@ class ProductController extends Controller
         );
     }
 
-    public function put(Request $request) {
+    public function put(Request $request)
+    {
         $id = $request->route("ProductId");
         $name = $request->name;
         $photo = $request->photo;
@@ -76,7 +93,7 @@ class ProductController extends Controller
         } else {
             $product->update([
                 "name" => $name,
-                "photo" => $photo,
+                "photo" => $product->photo,
                 "price" => $price,
                 "about" => $about,
                 "category_id" => $category_id,
@@ -93,10 +110,10 @@ class ProductController extends Controller
                 200
             );
         }
-
     }
 
-    public function delete(Request $request) {
+    public function delete(Request $request)
+    {
         $id = $request->route("ProductId");
 
         $product = Product::where("id", $id)->first();

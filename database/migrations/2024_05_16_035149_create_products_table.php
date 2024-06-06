@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('photo');
             $table->unsignedInteger('price');
-            $table->string('about');
+            $table->text('about');
             $table->foreignId('category_id')->constrained()->onDelete('restrict');
             $table->boolean('is_delete');
             $table->timestamps();
