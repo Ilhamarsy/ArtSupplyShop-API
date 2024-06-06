@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\QueryException;
 
 class ProductController extends Controller
 {
@@ -51,7 +52,7 @@ class ProductController extends Controller
                     "status" => "fail",
                     "message" => $th,
                 ],
-                401
+                400
             );
         }
     }
@@ -69,6 +70,30 @@ class ProductController extends Controller
             ],
             200
         );
+    }
+
+    public function getById(Request $request)
+    {
+        $id = $request->route("ProductId");
+        $product = Product::with("category")->where("id", $id)->first();
+
+        if (!$product) {
+            return response(
+                [
+                    "status" => "fail",
+                    "message" => "Product tidak ditemukan",
+                ],
+                404
+            );
+        } else {
+            return response(
+                [
+                    "status" => "success",
+                    "data" => $product,
+                ],
+                200
+            );
+        }
     }
 
     public function put(Request $request)
@@ -127,17 +152,27 @@ class ProductController extends Controller
                 404
             );
         } else {
-            $product->delete();
+            try {
+                $product->delete();
 
-            Cache::forget('products');
+                Cache::forget('products');
 
-            return response(
-                [
-                    "status" => "success",
-                    "message" => "Berhasil menghapus product",
-                ],
-                200
-            );
+                return response(
+                    [
+                        "status" => "success",
+                        "message" => "Berhasil menghapus product",
+                    ],
+                    200
+                );
+            } catch (QueryException $msg) {
+                return response(
+                    [
+                        "status" => "fail",
+                        "message" => "Tidak dapat dihapus, produk digunakan dalam transaksi",
+                    ],
+                    400
+                );
+            }
         }
     }
 }

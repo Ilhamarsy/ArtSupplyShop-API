@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
-    public function post(Request $request) {
+    public function post(Request $request)
+    {
         $user_id = $request->id;
         $address_id = $request->address_id;
         $total_amount = 0;
@@ -48,11 +49,18 @@ class TransactionController extends Controller
         );
     }
 
-    public function get(Request $request) {
-        $transaction = Transaction::where("user_id", $request->id)
-        ->with("address")
-        ->with("user")
-        ->get();
+    public function get(Request $request)
+    {
+        if ($request->role == "admin") {
+            $transaction = Transaction::with("address")
+                ->with("user")
+                ->get();
+        } else {
+            $transaction = Transaction::where("user_id", $request->id)
+                ->with("address")
+                ->with("user")
+                ->get();
+        }
 
         return response(
             [
@@ -63,15 +71,24 @@ class TransactionController extends Controller
         );
     }
 
-    public function getDetail(Request $request) {
+    public function getDetail(Request $request)
+    {
         $id = $request->route("TransactionId");
 
-        $transaction = Transaction::where("user_id", $request->id)
-        ->where("id", $id)
-        ->with("items")
-        ->with("address")
-        ->with("user")
-        ->get();
+        if ($request->role == "admin") {
+            $transaction = Transaction::where("id", $id)
+                ->with("items")
+                ->with("address")
+                ->with("user")
+                ->first();
+        } else {
+            $transaction = Transaction::where("user_id", $request->id)
+                ->where("id", $id)
+                ->with("items")
+                ->with("address")
+                ->with("user")
+                ->first();
+        }
 
         return response(
             [

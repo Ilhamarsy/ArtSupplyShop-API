@@ -21,8 +21,12 @@ Route::post("/customer/register", [UserController::class, "register"]);
 Route::get("/customer/profile", [UserController::class, "profile"])->middleware([CekToken::class]);
 
 // All - user
+// Login
 Route::post("/login", [UserController::class, "login"]);
+// Get Product
 Route::get("/product", [ProductController::class, "get"])->middleware([CekToken::class]);
+// Get Transaction
+Route::get("/transaction", [TransactionController::class, "get"])->middleware([CekToken::class]);
 
 // User Address
 Route::post("/customer/profile/address", [UserAddressController::class, "post"])->middleware([CekToken::class]);
@@ -38,9 +42,7 @@ Route::delete("/customer/cart/{CartId}", [CartController::class, "delete"])->mid
 Route::post("/customer/transaction", [TransactionController::class, "post"])->middleware([CekToken::class]);
 
 // User Transaction
-Route::get("/customer/transaction", [TransactionController::class, "get"])->middleware([CekToken::class]);
-Route::get("/customer/transaction/{TransactionId}", [TransactionController::class, "getDetail"])->middleware([CekToken::class]);
-
+Route::get("/transaction/{TransactionId}", [TransactionController::class, "getDetail"])->middleware([CekToken::class]);
 
 // Admin Category
 Route::get("/admin/category", [CategoryController::class, "get"])->middleware([CekToken::class, CekRoleAdmin::class]);
@@ -48,6 +50,7 @@ Route::post("/admin/category", [CategoryController::class, "post"])->middleware(
 Route::delete("/admin/category/{CategoryId}", [CategoryController::class, "delete"])->middleware([CekToken::class, CekRoleAdmin::class]);
 
 // Admin Product
+Route::get("/admin/product/{ProductId}", [ProductController::class, "getById"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::post("/admin/product", [ProductController::class, "post"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::put("/admin/product/{ProductId}", [ProductController::class, "put"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::delete("/admin/product/{ProductId}", [ProductController::class, "delete"])->middleware([CekToken::class, CekRoleAdmin::class]);
