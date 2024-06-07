@@ -54,3 +54,5 @@ Route::get("/admin/product/{ProductId}", [ProductController::class, "getById"])-
 Route::post("/admin/product", [ProductController::class, "post"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::put("/admin/product/{ProductId}", [ProductController::class, "put"])->middleware([CekToken::class, CekRoleAdmin::class]);
 Route::delete("/admin/product/{ProductId}", [ProductController::class, "delete"])->middleware([CekToken::class, CekRoleAdmin::class]);
+
+Route::post("/pay", [TransactionController::class, "pay"]);

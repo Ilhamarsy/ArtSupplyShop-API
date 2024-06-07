@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    public function post(Request $request) {
-        $name = $request->name;
+    public function post(Request $request)
+    {
+        $name = strtolower($request->name);
 
         $newCategory = Category::create([
             "name" => $name,
@@ -23,7 +24,8 @@ class CategoryController extends Controller
         );
     }
 
-    public function get() {
+    public function get()
+    {
         $categories = Category::get();
 
         return response(
@@ -35,7 +37,8 @@ class CategoryController extends Controller
         );
     }
 
-    public function delete(Request $request) {
+    public function delete(Request $request)
+    {
         $id = $request->route("CategoryId");
 
         $category = Category::where("id", $id)->first();

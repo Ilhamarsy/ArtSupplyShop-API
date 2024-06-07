@@ -11,7 +11,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 
+        'name',
         'photo',
         'price',
         'about',
@@ -21,7 +21,6 @@ class Product extends Model
 
     protected $hidden = [
         'category_id',
-        'is_delete',
         'updated_at',
         'created_at'
     ];

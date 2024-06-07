@@ -54,11 +54,13 @@ class TransactionController extends Controller
         if ($request->role == "admin") {
             $transaction = Transaction::with("address")
                 ->with("user")
+                ->with("items.product")
                 ->get();
         } else {
             $transaction = Transaction::where("user_id", $request->id)
                 ->with("address")
                 ->with("user")
+                ->with("items.product")
                 ->get();
         }
 
@@ -89,6 +91,25 @@ class TransactionController extends Controller
                 ->with("user")
                 ->first();
         }
+
+        return response(
+            [
+                "status" => "success",
+                "data" => $transaction,
+            ],
+            200
+        );
+    }
+
+    public function pay(Request $request)
+    {
+        $transactionId = $request->transaction_id;
+
+        $transaction = Transaction::where("id", $transactionId)->first();
+
+        $transaction->update([
+            "is_paid" => true,
+        ]);
 
         return response(
             [

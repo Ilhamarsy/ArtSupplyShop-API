@@ -34,6 +34,7 @@ class ProductController extends Controller
             ]);
 
             Cache::forget('products');
+            Cache::forget('admin-products');
 
             return response(
                 [
@@ -57,11 +58,17 @@ class ProductController extends Controller
         }
     }
 
-    public function get()
+    public function get(Request $request)
     {
-        $products = Cache::remember('products', now()->addMinutes(30), function () {
-            return Product::with("category")->get();
-        });
+        if ($request->role == "admin") {
+            $products = Cache::remember('admin-products', now()->addMinutes(30), function () {
+                return Product::with("category")->get();
+            });
+        } else {
+            $products = Cache::remember('products', now()->addMinutes(30), function () {
+                return Product::with("category")->where("is_delete", false)->get();
+            });
+        }
 
         return response(
             [
@@ -100,7 +107,6 @@ class ProductController extends Controller
     {
         $id = $request->route("ProductId");
         $name = $request->name;
-        $photo = $request->photo;
         $price = $request->price;
         $about = $request->about;
         $category_id = $request->category_id;
@@ -126,6 +132,7 @@ class ProductController extends Controller
             ]);
 
             Cache::forget('products');
+            Cache::forget('admin-products');
 
             return response(
                 [
@@ -143,6 +150,7 @@ class ProductController extends Controller
 
         $product = Product::where("id", $id)->first();
 
+
         if (!$product) {
             return response(
                 [
@@ -153,9 +161,17 @@ class ProductController extends Controller
             );
         } else {
             try {
-                $product->delete();
+                $product->update([
+                    "name" => $product->name,
+                    "photo" => $product->photo,
+                    "price" => $product->price,
+                    "about" => $product->about,
+                    "category_id" => $product->category_id,
+                    "is_delete" => true,
+                ]);
 
                 Cache::forget('products');
+                Cache::forget('admin-products');
 
                 return response(
                     [
